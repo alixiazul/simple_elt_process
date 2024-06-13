@@ -65,11 +65,11 @@ services:
       - elt_network
     environment:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql://airflow:airflow@postgres/airflow
-    command: >
-      bash -c "airflow db init &&
+    command: >  # multiline
+      bash -c "airflow db migrate &&
               airflow users create --username airflow --password password --firstname John --lastname Doe --role Admin --email admin@example.com"
 
-  webserver: # webserver for the UI of Airflow
+  webserver: # webserver for the UI of Airflow so we can access Airflow
     build:
       context: .
       dockerfile: Dockerfile.airflow
@@ -90,7 +90,32 @@ services:
       - .env.airflow
     ports:
       - "8080:8080"
-    command: webserver
+    command: >
+      bash -c "airflow db init && exec airflow webserver"
+
+  scheduler: # scheduler for Airflow, to schedule the jobs
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    user: root
+    depends_on:
+      - postgres
+    networks:
+      - elt_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./elt:/opt/airflow/elt
+      - ./custom_postgres:/opt/dbt
+      - ~/.dbt:/root/
+      - /var/run/docker.sock:/var/run/docker.sock # Giving airflow access to the docker network    
+    env_file:
+      - .env.airflow
+    ports:
+      - "8081:8080"
+    command: >
+      bash -c "airflow db init && exec airflow scheduler"
 
 networks:
   elt_network:
