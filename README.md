@@ -4,4 +4,6 @@ Simple custom Extract, Load, Transform (ELT) project that utilises Docker and Po
 
 ## Instructions of use
 
-`docker compose up`
+```
+docker compose up
+```
