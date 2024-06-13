@@ -1,0 +1,9 @@
+FROM apache/airflow:latest
+
+# Create a non-root user and group
+RUN groupadd -r airflow && useradd -r -g airflow airflow
+
+# Switch to the non-root user
+USER airflow
+
+RUN pip install apache-airflow-providers-docker
