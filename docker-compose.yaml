@@ -1,6 +1,6 @@
 services:
   source_postgres:
-    image: postgres:9.2
+    image: postgres:9.3 # Use this version (or greater) that have the pg_matviews tables needed for the dbt service and doesn't have any issue with "pg_dump"
     ports:
       - "5433:5432"
     networks:
@@ -11,7 +11,7 @@ services:
       - ./source_db_init/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   destination_postgres:
-    image: postgres:9.2
+    image: postgres:9.3 # Use this version (or greater) that have the pg_matviews tables needed for the dbt service and doesn't have any issue with "pg_dump"
     ports:
       - "5434:5432"
     networks:
@@ -41,7 +41,7 @@ services:
     networks:
       - elt_network
     volumes:
-      - /custom_postgres:/dbt
+      - ./custom_postgres:/dbt
       - ~/.dbt:/root
     depends_on:
       elt_script:
