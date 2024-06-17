@@ -19,36 +19,38 @@ services:
     env_file:
       - .env.destination
 
-  elt_script:
-    build:
-      dockerfile: Dockerfile
-    command: ["python", "elt_script.py"]
-    networks:
-      - elt_network
-    depends_on:
-      - source_postgres
-      - destination_postgres
+  # Commenting because AIRFLOW creates the elt_script and dbt service / task for us
+   
+  # elt_script:
+  #   build:
+  #     dockerfile: Dockerfile
+  #   command: ["python", "elt_script.py"]
+  #   networks:
+  #     - elt_network
+  #   depends_on:
+  #     - source_postgres
+  #     - destination_postgres
 
-  dbt:
-    image: ghcr.io/dbt-labs/dbt-postgres:latest
-    command: [
-      "run",
-      "--profiles-dir",
-      "/root",
-      "--project-dir",
-      "/dbt"
-    ]
-    networks:
-      - elt_network
-    volumes:
-      - ./custom_postgres:/dbt
-      - ~/.dbt:/root/
-    depends_on:
-      elt_script:
-        condition: service_completed_successfully
-    environment:
-      DBT_PROFILE: default
-      DBT_TARGET: dev
+  # dbt:
+  #   image: ghcr.io/dbt-labs/dbt-postgres:latest
+  #   command: [
+  #     "run",
+  #     "--profiles-dir",
+  #     "/root",
+  #     "--project-dir",
+  #     "/dbt"
+  #   ]
+  #   networks:
+  #     - elt_network
+  #   volumes:
+  #     - ./custom_postgres:/dbt
+  #     - ~/.dbt:/root/
+  #   depends_on:
+  #     elt_script:
+  #       condition: service_completed_successfully
+  #   environment:
+  #     DBT_PROFILE: default
+  #     DBT_TARGET: dev
 
   postgres: # database for AirFlow to store its metadata and logs
     image: postgres:9.3
